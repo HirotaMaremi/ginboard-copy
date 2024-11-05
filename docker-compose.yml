@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./docker/go/Dockerfile
+    ports:
+      - 3003:3003
+#    links:
+#      - mysql
+    tty:
+      true
+    volumes:
+      - ./app:/go/src/app
+    depends_on:
+      - mysql
+
+#  mariadb:
+#    container_name: mariadb
+#    image: mariadb:10
+#    hostname: localhost
+#    ports:
+#      - 3306:3306
+#    env_file:
+#      - ./docker/mysql/env
+#    volumes:
+#      - dbdata:/var/lib/mysql
+#    networks:
+#      - common
+
+
+  mysql:
+    container_name: mysql
+    build:
+      context: .
+      dockerfile: ./docker/mysql/Dockerfile
+#    hostname: mysql
+#    restart: always
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./docker/mysql/env
+#    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --skip-character-set-client-handshake
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_general_ci','--default-time-zone=+09:00']
+    volumes:
+#      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:cached
+      - "./docker/mysql/data:/var/lib/mysql"
+      - "./docker/mysql/my.conf:/etc/mysql/my.conf"
+      - "./docker/mysql/init/:/docker-entrypoint-initdb.d"
+
+#volumes:
+#  dbdata:
+#    driver: local
+#
+#networks:
+#  common:
+#    driver: bridge
